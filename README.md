@@ -94,7 +94,7 @@ O modelo alcançou uma acurácia geral sólida na casa dos 80% (79.63% nos teste
 2. **O perigo do "Tempo de Casa" (Tenure):** O risco de evasão é crítico nos primeiros 6 meses de assinatura. Se o cliente ultrapassar essa barreira, a curva de fidelidade se estabiliza.
 3. **Faturamento sem Suporte:** Cobranças mensais elevadas sem que o cliente tenha contratado pacotes de suporte técnico ou proteção de dispositivo aceleram a insatisfação.
 
-![Gráfico de Importância das Variáveis](grafico_churn.png)
+![Gráfico de Importância das Variáveis](cancelamento;churn.png)
 
 ```python
 # ========================================== #
