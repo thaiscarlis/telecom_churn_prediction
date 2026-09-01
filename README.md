@@ -1,7 +1,4 @@
-<img width="1600" height="400" alt="WhatsApp Image 2026-09-01 at 3 01 06 PM" src="https://github.com/user-attachments/assets/af10bc17-935f-4413-a699-1d143ffde350" />
 # Previsão de Churn em Telecom
-
-![Capa do projeto](capa-churn-callcenter)
 
 ## Sobre o projeto
 
@@ -51,7 +48,7 @@ A variável `Churn` é o alvo que o modelo tenta prever.
 
 Antes de construir o modelo, foi analisada a distribuição entre clientes que permaneceram e clientes que cancelaram o serviço.
 
-![Distribuição de Churn](grafico1)
+![Distribuição de Churn](grafico1.png)
 
 A quantidade de clientes que permaneceu na empresa é maior do que a quantidade de clientes que cancelou.
 
@@ -71,7 +68,7 @@ Os resultados apresentados nesta etapa representam padrões observados na base. 
 
 O tipo de contrato apresenta diferenças na taxa de cancelamento entre os grupos.
 
-![Taxa de Churn por contrato](grafico2)
+![Taxa de Churn por contrato](grafico2.png)
 
 Essa análise ajuda a identificar quais tipos de contrato concentram uma proporção maior de clientes que cancelaram.
 
@@ -79,50 +76,29 @@ Esse tipo de informação pode ser utilizado como ponto de partida para investig
 
 ---
 
-### Tempo de permanência
-
-A variável `tenure` representa o número de meses que o cliente permaneceu na empresa.
-
-![Tempo de permanência por Churn](imagens/tenure-churn.png)
-
-A comparação permite observar como o tempo de relacionamento se distribui entre clientes que permaneceram e aqueles que cancelaram.
-
-Essa variável também será utilizada pelo modelo na identificação de padrões associados ao churn.
-
----
-
-### Cobrança mensal
-
-Também foi analisada a distribuição dos valores de cobrança mensal entre os dois grupos.
-
-![Cobrança mensal por Churn](imagens/monthly-charges-churn.png)
-
-A visualização permite comparar a distribuição de `MonthlyCharges` entre clientes que permaneceram e clientes que cancelaram.
-
-Assim como nas análises anteriores, essa relação representa uma associação encontrada nos dados e não significa que o valor da cobrança seja, isoladamente, responsável pelo cancelamento.
-
----
-
 ## Metodologia
 
-O desenvolvimento do modelo foi dividido em algumas etapas:
+O desenvolvimento do modelo foi dividido em algumas etapas.
 
-**1. Preparação dos dados**
+### 1. Preparação dos dados
 
-Remoção do identificador do cliente e conversão da variável `TotalCharges` para formato numérico.
+Foi realizada a remoção do identificador do cliente e a conversão da variável `TotalCharges` para formato numérico.
 
-**2. Separação entre treino e teste**
+A variável `Churn` foi transformada em uma variável binária, sendo:
+
+* `0` = cliente permaneceu
+* `1` = cliente cancelou
+
+### 2. Separação entre treino e teste
 
 Os dados foram divididos em:
 
-* 80% para treinamento
-* 20% para teste
+* **80% para treinamento**
+* **20% para teste**
 
-A divisão foi realizada de forma estratificada, mantendo a proporção das classes de Churn nos dois conjuntos.
+A divisão foi realizada de forma estratificada, mantendo a proporção das classes de `Churn` nos dois conjuntos.
 
-![Divisão entre treino e teste](imagens/divisao-treino-teste.png)
-
-**3. Pré-processamento**
+### 3. Pré-processamento
 
 As variáveis categóricas foram transformadas utilizando `OneHotEncoder`.
 
@@ -130,7 +106,7 @@ Valores ausentes foram tratados dentro do pipeline utilizando imputação pela m
 
 Essa abordagem evita que informações do conjunto de teste sejam utilizadas durante o treinamento.
 
-**4. Modelagem**
+### 4. Modelagem
 
 Foi utilizado o algoritmo **Random Forest Classifier**, um modelo baseado na combinação de diversas árvores de decisão.
 
@@ -176,38 +152,11 @@ Os valores abaixo devem ser preenchidos com os resultados reais obtidos durante 
 
 > **Importante:** os resultados apresentados aqui devem ser os mesmos obtidos na execução final do notebook.
 
-Em um problema de churn, o **recall** merece atenção especial. Um falso negativo representa um cliente que realmente cancelou, mas que não foi identificado pelo modelo como possível churn.
+Em um problema de churn, o **recall** merece atenção especial.
 
----
+Um falso negativo representa um cliente que realmente cancelou, mas que não foi identificado pelo modelo como possível churn.
 
-## Matriz de confusão
-
-A matriz de confusão permite observar de forma mais detalhada os acertos e erros realizados pelo modelo no conjunto de teste.
-
-![Matriz de Confusão](imagens/matriz-confusao.png)
-
-Os principais resultados podem ser interpretados como:
-
-* **Verdadeiro negativo:** cliente que não cancelou e foi corretamente classificado.
-* **Verdadeiro positivo:** cliente que cancelou e foi corretamente identificado.
-* **Falso positivo:** cliente que não cancelou, mas foi classificado como churn.
-* **Falso negativo:** cliente que cancelou, mas não foi identificado pelo modelo.
-
-Para a área de retenção, os falsos negativos merecem atenção porque representam clientes que poderiam ter sido priorizados para uma ação, mas não foram identificados pelo modelo.
-
----
-
-## Variáveis mais importantes
-
-O Random Forest permite analisar quais variáveis tiveram maior importância nas decisões realizadas pelo modelo.
-
-![Importância das variáveis](imagens/importancia-variaveis.png)
-
-Essa análise deve ser interpretada como uma forma de compreender o comportamento do modelo.
-
-Uma variável com alta importância não significa necessariamente que ela seja a causa do cancelamento. Ela indica que o modelo utilizou aquela informação com maior frequência ou relevância para realizar suas previsões.
-
-Além disso, variáveis categóricas são transformadas em diferentes categorias durante o One-Hot Encoding, o que deve ser considerado na interpretação do gráfico.
+Nesse contexto, aumentar o recall pode ser importante para reduzir a quantidade de clientes em risco que deixam de ser identificados.
 
 ---
 
@@ -228,8 +177,6 @@ Segmentação de risco
         ↓
 Ações de retenção
 ```
-
-![Fluxo de aplicação](imagens/fluxo-retencao.png)
 
 Por exemplo, clientes classificados com maior probabilidade de churn poderiam ser priorizados para ações de relacionamento, ofertas personalizadas ou contato da equipe responsável pela retenção.
 
@@ -270,18 +217,8 @@ telecom_churn_prediction/
 ├── README.md
 ├── WA_Fn-UseC_-Telco-Customer-Churn.csv
 ├── notebook_churn.ipynb
-│
-├── imagens/
-│   ├── capa-telecom-churn.png
-│   ├── distribuicao-churn.png
-│   ├── divisao-treino-teste.png
-│   ├── churn-por-contrato.png
-│   ├── tenure-churn.png
-│   ├── monthly-charges-churn.png
-│   ├── matriz-confusao.png
-│   ├── importancia-variaveis.png
-│   └── fluxo-retencao.png
-│
+├── grafico1.png
+├── grafico2.png
 └── requirements.txt
 ```
 
@@ -289,30 +226,18 @@ telecom_churn_prediction/
 
 ## Conclusão
 
-Este projeto demonstra uma aplicação prática de Machine Learning para um problema de negócio relacionado à retenção de clientes.
+Este projeto demonstrou como técnicas de Machine Learning podem ser utilizadas para identificar padrões associados ao cancelamento de clientes em uma empresa de telecomunicações.
 
-A partir da análise exploratória, foi possível observar diferentes padrões associados ao churn. Em seguida, foi desenvolvido um modelo de Random Forest com pré-processamento estruturado em pipeline, evitando vazamento de informações entre treinamento e teste.
+A análise exploratória permitiu compreender características da base e observar diferenças entre clientes que permaneceram e clientes que cancelaram.
 
-A avaliação foi realizada utilizando diferentes métricas, permitindo uma visão mais completa do desempenho do modelo do que a utilização isolada da acurácia.
+A utilização de um pipeline de pré-processamento junto ao Random Forest também contribuiu para uma estrutura mais adequada de treinamento e avaliação, reduzindo o risco de data leakage.
 
-Mais do que prever quem pode cancelar, o objetivo é transformar a previsão em informação útil para apoiar a priorização de estratégias de retenção.
+Além da construção do modelo, o projeto busca demonstrar como uma previsão de churn pode ser transformada em informação útil para o negócio.
 
-### Próximos passos
+Na prática, o modelo pode apoiar equipes de retenção na identificação e priorização de clientes com maior risco, permitindo que estratégias de relacionamento sejam direcionadas de forma mais eficiente.
 
-Como evolução do projeto, algumas possibilidades seriam:
-
-* Comparar o Random Forest com Regressão Logística e outros algoritmos.
-* Realizar otimização de hiperparâmetros.
-* Avaliar a calibração das probabilidades previstas.
-* Criar faixas de risco de churn.
-* Desenvolver um dashboard no Power BI.
-* Criar uma rotina para disponibilizar novas previsões.
-* Avaliar o impacto das ações de retenção após a implementação do modelo.
-
----
+## Como próximos passos, o projeto poderia evoluir com testes de outros algoritmos, ajuste de hiperparâmetros, análise de diferentes thresholds de classificação e acompanhamento do desempenho do modelo em dados reais.
 
 ## Notebook
 
-O desenvolvimento completo, incluindo preparação dos dados, análise exploratória, treinamento e avaliação do modelo, está disponível no notebook:
-
-**`notebook_churn.ipynb`**
+O notebook completo com todas as etapas de análise, preparação dos dados, treinamento e avaliação do modelo está disponível neste repositório.
