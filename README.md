@@ -45,19 +45,13 @@ Antes da construção do modelo, é importante compreender o significado das inf
 
 Algumas das principais variáveis utilizadas no projeto são:
 
-**`tenure`** — representa há quantos meses o cliente está na empresa. Essa informação permite observar se o tempo de relacionamento está associado ao cancelamento.
-
-**`Contract`** — indica o tipo de contrato do cliente. Contratos com diferentes níveis de compromisso podem apresentar comportamentos distintos em relação ao churn.
-
-**`MonthlyCharges`** — representa o valor cobrado mensalmente do cliente.
-
-**`TotalCharges`** — representa o total acumulado de cobranças durante o período de relacionamento do cliente com a empresa.
-
-**`PaymentMethod`** — indica a forma utilizada pelo cliente para realizar os pagamentos.
-
-**`InternetService`** — identifica o tipo de serviço de internet contratado.
-
-**`Churn`** — indica se o cliente cancelou ou permaneceu utilizando o serviço. Essa é a variável que será prevista pelo modelo.
+* **`tenure`** — representa há quantos meses o cliente está na empresa.
+* **`Contract`** — indica o tipo de contrato do cliente.
+* **`MonthlyCharges`** — representa o valor cobrado mensalmente.
+* **`TotalCharges`** — representa o total acumulado de cobranças.
+* **`PaymentMethod`** — indica a forma utilizada para pagamento.
+* **`InternetService`** — identifica o tipo de serviço de internet contratado.
+* **`Churn`** — indica se o cliente cancelou ou permaneceu utilizando o serviço.
 
 ---
 
@@ -95,7 +89,7 @@ A variável-alvo **`Churn`** é transformada para representação numérica:
 * `No` → `0`
 * `Yes` → `1`
 
-O tratamento das variáveis preditoras deve ser realizado de forma cuidadosa para evitar **data leakage**, ou seja, impedir que informações do conjunto utilizado para avaliação influenciem indevidamente o processo de treinamento.
+O tratamento das variáveis preditoras deve ser realizado de forma cuidadosa para evitar **data leakage**, impedindo que informações do conjunto utilizado para avaliação influenciem indevidamente o processo de treinamento.
 
 ---
 
@@ -103,11 +97,9 @@ O tratamento das variáveis preditoras deve ser realizado de forma cuidadosa par
 
 Antes do treinamento do modelo, são analisadas algumas relações entre as características dos clientes e o churn.
 
-O objetivo desta etapa é identificar padrões presentes na base que possam ajudar a compreender o comportamento dos clientes.
+O objetivo desta etapa é identificar padrões presentes na base que possam ajudar a compreender melhor o comportamento dos clientes.
 
 Os padrões observados representam **associações encontradas nos dados** e não devem ser interpretados automaticamente como relações de causa e efeito.
-
----
 
 ### 📄 Churn por tipo de contrato
 
@@ -115,11 +107,11 @@ O tipo de contrato pode estar relacionado ao nível de compromisso do cliente co
 
 Para investigar essa relação, foi calculada a **taxa de churn para cada tipo de contrato**, permitindo comparar a proporção de cancelamentos entre os diferentes grupos.
 
-![Taxa de Churn por tipo de contrato](grafico2.png)
+![Churn por tipo de contrato](grafico2.png)
 
 A comparação permite identificar quais modalidades de contrato apresentam maior proporção de cancelamentos dentro da base analisada.
 
-Esse tipo de informação pode ser utilizado para orientar análises mais aprofundadas e ajudar na definição de possíveis estratégias de retenção direcionadas a diferentes perfis de clientes.
+Esse tipo de informação pode ajudar a orientar análises mais aprofundadas e possíveis estratégias de retenção direcionadas a grupos que apresentam maior ocorrência de churn.
 
 É importante destacar que o gráfico apresenta uma **associação entre contrato e churn**. Ele não demonstra, isoladamente, que o tipo de contrato seja a causa do cancelamento.
 
@@ -127,7 +119,7 @@ Esse tipo de informação pode ser utilizado para orientar análises mais aprofu
 
 ## 🤖 Estratégia de Machine Learning
 
-O objetivo das próximas etapas do projeto é utilizar as informações disponíveis para construir um modelo de classificação capaz de estimar o risco de churn.
+O objetivo das próximas etapas é utilizar as informações disponíveis para construir um modelo de classificação capaz de estimar o risco de churn.
 
 O desenvolvimento considera etapas como:
 
@@ -148,7 +140,7 @@ O algoritmo escolhido para o projeto é o **Random Forest Classifier**.
 
 O Random Forest combina diversas árvores de decisão para realizar as previsões e consegue trabalhar com relações não lineares entre as características dos clientes.
 
-No projeto, o pré-processamento e o modelo são estruturados utilizando recursos do **Scikit-learn**, incluindo `Pipeline` e `ColumnTransformer`.
+O pré-processamento e o modelo são estruturados utilizando recursos do **Scikit-learn**, incluindo `Pipeline` e `ColumnTransformer`.
 
 Essa abordagem permite manter as etapas de transformação e modelagem organizadas em um único fluxo e ajuda a reduzir o risco de vazamento de informações entre os dados de treinamento e teste.
 
@@ -246,12 +238,6 @@ telecom_churn_prediction/
 └── grafico2.png
 ```
 
-### Imagens utilizadas
-
-`grafico1.png` — Distribuição dos clientes por situação de Churn
-
-`grafico2.png` — Taxa de Churn por tipo de contrato
-
 ---
 
 ## 🚧 Status do projeto
@@ -267,7 +253,7 @@ Até o momento, foram realizadas as etapas de:
 * Análise exploratória
 * Análise da taxa de churn por tipo de contrato
 
-As próximas etapas incluem a continuidade da análise exploratória, preparação dos dados para Machine Learning, treinamento do modelo e avaliação dos resultados.
+As próximas etapas incluem a continuidade da preparação dos dados para Machine Learning, treinamento do modelo e avaliação dos resultados.
 
 ---
 
