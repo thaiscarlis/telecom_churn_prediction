@@ -1,3 +1,4 @@
+<img width="1600" height="400" alt="WhatsApp Image 2026-09-01 at 3 01 06 PM" src="https://github.com/user-attachments/assets/c03c2a7d-f73f-49cb-b9ac-cffdb0f2bbc0" />
 # Previsão de Churn em Telecom
 
 ## Sobre o projeto
