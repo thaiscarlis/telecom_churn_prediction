@@ -4,19 +4,19 @@
 
 ### Machine Learning aplicado à retenção de clientes
 
-Este projeto tem como objetivo analisar o comportamento de clientes de uma empresa de telecomunicações e desenvolver modelos capazes de identificar clientes com maior probabilidade de cancelamento.
+Este projeto analisa o comportamento de clientes de uma empresa de telecomunicações e desenvolve um modelo capaz de identificar clientes com maior probabilidade de cancelamento.
 
-A proposta é ir além da previsão: compreender quais características estão associadas ao churn, avaliar diferentes abordagens de Machine Learning e transformar os resultados em informações que possam apoiar estratégias de retenção.
+A proposta vai além da previsão: compreender padrões associados ao churn, comparar diferentes abordagens de Machine Learning e transformar os resultados em informações que possam apoiar estratégias de retenção.
 
 ---
 
 ## 🎯 Contexto do problema
 
-A perda de clientes, conhecida como **churn**, é um dos principais desafios enfrentados por empresas que trabalham com serviços recorrentes, como as operadoras de telecomunicações.
+A perda de clientes, conhecida como **churn**, é um dos principais desafios enfrentados por empresas que trabalham com serviços recorrentes.
 
-Conquistar novos clientes normalmente exige investimentos em aquisição, enquanto identificar antecipadamente clientes com maior risco de cancelamento pode ajudar a empresa a direcionar melhor seus esforços de retenção.
+Identificar antecipadamente clientes com maior risco de cancelamento pode ajudar a direcionar estratégias de retenção e priorizar clientes que exigem maior atenção.
 
-Neste projeto, o problema pode ser resumido pela seguinte pergunta:
+Neste projeto, o problema é resumido pela seguinte pergunta:
 
 > **Quais clientes apresentam maior probabilidade de cancelar o serviço?**
 
@@ -26,9 +26,7 @@ Para responder a essa questão, são analisadas informações relacionadas ao pe
 
 ## 📂 Base de dados
 
-O conjunto de dados utilizado contém informações de clientes de uma empresa de telecomunicações.
-
-A base possui:
+O conjunto de dados utilizado contém:
 
 * **7.043 clientes**
 * **21 variáveis**
@@ -41,214 +39,225 @@ A variável **`Churn`** é utilizada como variável-alvo e indica se determinado
 
 ## 🔎 Principais variáveis analisadas
 
-Algumas das principais variáveis utilizadas no projeto são:
+Algumas das principais variáveis utilizadas são:
 
-* **`tenure`** — representa há quantos meses o cliente está na empresa.
-* **`Contract`** — indica o tipo de contrato do cliente.
-* **`MonthlyCharges`** — representa o valor cobrado mensalmente.
-* **`TotalCharges`** — representa o total acumulado de cobranças.
-* **`PaymentMethod`** — indica a forma utilizada para pagamento.
-* **`InternetService`** — identifica o tipo de serviço de internet contratado.
+* **`tenure`** — quantidade de meses que o cliente permanece na empresa.
+* **`Contract`** — tipo de contrato.
+* **`MonthlyCharges`** — valor cobrado mensalmente.
+* **`TotalCharges`** — total acumulado de cobranças.
+* **`PaymentMethod`** — forma de pagamento.
+* **`InternetService`** — tipo de serviço de internet contratado.
 * **`Churn`** — indica se o cliente cancelou ou permaneceu utilizando o serviço.
 
 ---
 
 ## 📊 Distribuição do Churn
 
-Antes da modelagem, foi analisada a distribuição da variável-alvo.
-
-Na base utilizada:
+Na base analisada:
 
 * **5.174 clientes permaneceram**
-* **1.869 clientes cancelaram o serviço**
+* **1.869 clientes cancelaram**
 
-![Distribuição de clientes por situação de Churn](gafico1.png)
+![Distribuição de clientes por situação de Churn](grafico1.png)
 
-A distribuição mostra que a quantidade de clientes que permaneceu na empresa é consideravelmente maior do que a quantidade de clientes que cancelou.
+A quantidade de clientes que permaneceu é consideravelmente maior do que a quantidade de clientes que cancelou, indicando um desbalanceamento entre as classes.
 
-Isso significa que as classes não estão perfeitamente equilibradas.
-
-Essa característica precisa ser considerada durante a avaliação dos modelos, pois uma boa **acurácia** pode ser obtida simplesmente pelo maior número de acertos na classe predominante.
-
-Por esse motivo, a avaliação não será baseada apenas em acurácia. Métricas como **Precision, Recall, F1-score e ROC-AUC** também serão consideradas.
+Por esse motivo, a avaliação dos modelos não foi baseada apenas em acurácia. Também foram consideradas **Precision, Recall, F1-score e ROC-AUC**.
 
 ---
 
 ## 🧹 Tratamento dos dados
 
-Antes da modelagem, algumas informações precisam ser preparadas.
+A coluna **`customerID`** foi removida por funcionar apenas como identificador individual do cliente.
 
-A coluna **`customerID`** é removida porque funciona apenas como identificador individual do cliente e não possui utilidade direta para a previsão.
+A variável **`TotalCharges`**, originalmente armazenada como texto, foi convertida para formato numérico. A conversão revelou **11 valores ausentes**, tratados posteriormente dentro do pipeline.
 
-A variável **`TotalCharges`** originalmente está armazenada como texto e precisa ser convertida para formato numérico.
-
-A variável-alvo **`Churn`** é transformada para representação numérica:
+A variável-alvo **`Churn`** foi transformada para representação numérica:
 
 * `No` → `0`
 * `Yes` → `1`
 
-O tratamento das variáveis preditoras será integrado ao processo de modelagem utilizando **Pipeline** e **ColumnTransformer**.
+Para reduzir o risco de **data leakage**, o pré-processamento foi integrado ao processo de modelagem utilizando `Pipeline` e `ColumnTransformer`.
 
-Essa abordagem permite que as transformações sejam ajustadas utilizando apenas os dados de treinamento, reduzindo o risco de **data leakage**.
+As transformações foram ajustadas somente sobre os dados de treinamento.
 
 ---
 
 ## 📈 Análise exploratória
 
-Antes do treinamento dos modelos, são analisadas relações entre as características dos clientes e o churn.
+### Churn por tipo de contrato
 
-O objetivo é identificar padrões presentes na base que possam ajudar a compreender o comportamento dos clientes.
-
-Os padrões observados representam **associações encontradas nos dados** e não devem ser interpretados automaticamente como relações de causa e efeito.
-
-### 📄 Churn por tipo de contrato
-
-O tipo de contrato pode estar associado ao nível de compromisso do cliente com a empresa.
-
-Para investigar essa relação, foi calculada a **taxa de churn para cada tipo de contrato**, permitindo comparar a proporção de cancelamentos entre os diferentes grupos.
+Foi analisada a taxa de churn entre os diferentes tipos de contrato.
 
 ![Churn por tipo de contrato](grafico2.png)
 
-A comparação permite identificar quais modalidades apresentam maior proporção de cancelamentos dentro da base analisada.
+A análise mostra diferenças na ocorrência de churn entre as modalidades de contrato, indicando uma associação entre essas variáveis.
 
-Essa informação pode ajudar a orientar análises posteriores e estratégias de retenção direcionadas a diferentes perfis de clientes.
-
-O resultado demonstra uma **associação entre contrato e churn**, mas não permite concluir, isoladamente, que o tipo de contrato seja a causa do cancelamento.
+Esse resultado não deve ser interpretado isoladamente como uma relação causal, mas pode ajudar a identificar grupos que merecem maior atenção em análises de retenção.
 
 ---
 
 ## 🤖 Estratégia de Machine Learning
 
-A modelagem será realizada a partir da separação dos dados entre **treinamento e teste**, mantendo o conjunto de teste fora do processo de ajuste do modelo.
+Os dados foram divididos em três conjuntos:
 
-Serão avaliados dois modelos:
+* **60% para treinamento**
+* **20% para validação**
+* **20% para teste**
+
+A proporção de churn foi preservada nos três conjuntos, permanecendo próxima de **26,5%**.
+
+O conjunto de treinamento foi utilizado para ajustar os modelos, o conjunto de validação para analisar diferentes thresholds e o conjunto de teste permaneceu separado para a avaliação final.
+
+Foram comparados dois algoritmos:
 
 ### Logistic Regression
 
-A **Logistic Regression** será utilizada como baseline.
-
-O objetivo é estabelecer uma referência de desempenho utilizando um modelo relativamente simples e interpretável.
+Utilizada como **baseline**, fornecendo uma referência relativamente simples e interpretável.
 
 ### Random Forest Classifier
 
-O **Random Forest Classifier** será utilizado como segundo modelo.
-
-Por combinar diversas árvores de decisão, o algoritmo consegue representar relações mais complexas e não lineares entre as características dos clientes.
-
-A comparação permitirá avaliar se o aumento de complexidade do Random Forest produz ganhos relevantes em relação ao baseline.
+Utilizado como segundo modelo para verificar se uma abordagem mais complexa produziria ganhos relevantes.
 
 ---
 
-## 📏 Avaliação dos modelos
+## 📏 Comparação dos modelos
 
-Os modelos serão avaliados tanto nos dados de **treinamento** quanto nos dados de **teste**.
+Os modelos foram inicialmente avaliados utilizando o threshold padrão de classificação.
 
-Essa comparação é importante para identificar situações em que um modelo apresenta desempenho muito elevado nos dados utilizados durante o treinamento, mas perde capacidade de generalização diante de novos dados.
+| Modelo              | Accuracy Treino | Accuracy Teste |  Precision |     Recall |   F1-score |    ROC-AUC |
+| ------------------- | --------------: | -------------: | ---------: | ---------: | ---------: | ---------: |
+| Logistic Regression |          80,45% |     **78,85%** | **61,95%** | **52,67%** | **56,94%** | **83,27%** |
+| Random Forest       |          99,83% |         77,86% |     60,76% |     46,79% |     52,87% |     80,63% |
 
-As principais métricas consideradas serão:
+A **Logistic Regression apresentou melhor desempenho no conjunto de teste** nas principais métricas avaliadas.
 
-* **Accuracy** — proporção total de previsões corretas.
-* **Precision** — entre os clientes classificados como churn, quantos realmente cancelaram.
-* **Recall** — entre todos os clientes que realmente cancelaram, quantos foram identificados pelo modelo.
-* **F1-score** — equilíbrio entre Precision e Recall.
-* **ROC-AUC** — capacidade do modelo de distinguir clientes que cancelam daqueles que permanecem.
+O Random Forest atingiu **99,83% de acurácia no treinamento**, mas caiu para **77,86% no teste**, indicando forte diferença entre o desempenho nos dados conhecidos e em novos dados.
 
-Em um cenário de retenção, o **Recall possui importância especial**.
+Esse comportamento sugere **overfitting**.
 
-Um falso negativo representa um cliente que realmente cancelaria, mas que não foi identificado pelo modelo como cliente de risco.
+A comparação demonstra que, neste problema, o aumento da complexidade do modelo não resultou em melhor capacidade de generalização.
+
+Por apresentar maior Recall, além de melhores F1-score e ROC-AUC, a **Logistic Regression foi selecionada para as análises seguintes**.
 
 ---
 
 ## 🔍 Matriz de confusão
 
-Além das métricas gerais, será utilizada uma **matriz de confusão** para analisar os tipos de acertos e erros produzidos pelo modelo.
+A matriz de confusão permite observar os tipos de acertos e erros produzidos pelo modelo.
 
-Ela permitirá visualizar:
+![Matriz de confusão](grafico3.png)
 
-* Clientes corretamente identificados como permanência
-* Clientes corretamente identificados como churn
-* Falsos positivos
-* Falsos negativos
+No contexto de churn, os **falsos negativos** possuem importância especial.
 
-Essa análise é especialmente importante porque diferentes tipos de erro podem gerar impactos diferentes para o negócio.
+Eles representam clientes que realmente cancelaram, mas foram classificados pelo modelo como clientes que permaneceriam.
+
+Para uma estratégia de retenção, esse tipo de erro pode representar uma oportunidade perdida de intervenção.
 
 ---
 
 ## 🎚️ Análise do threshold
 
-A classificação de churn depende de um limite de probabilidade utilizado para transformar a previsão do modelo em uma decisão de classe.
+O threshold padrão de classificação é **0,50**.
 
-Em vez de considerar apenas o threshold padrão, serão avaliados diferentes valores para observar o impacto sobre **Precision e Recall**.
+Entretanto, em um problema de churn, utilizar apenas esse valor pode não representar o melhor equilíbrio para o objetivo do negócio.
 
-Reduzir o threshold pode permitir que mais clientes que realmente cancelariam sejam identificados, aumentando o Recall, mas também pode gerar mais falsos positivos.
+Foram analisados thresholds entre **0,20 e 0,70** utilizando o conjunto de validação.
 
-A escolha adequada representa, portanto, um equilíbrio entre **capacidade de identificação e custo das ações de retenção**.
+![Impacto do threshold nas métricas](grafico4.png)
 
----
+A análise mostrou o trade-off entre **Precision e Recall**.
 
-## 💼 Aplicação no negócio
+Thresholds menores aumentam a capacidade de identificar clientes que realmente cancelam, mas também aumentam a quantidade de falsos positivos.
 
-A probabilidade de churn pode ser utilizada como uma ferramenta de priorização, e não apenas como uma classificação entre clientes que irão ou não cancelar.
+Foi definida como referência uma busca por **Recall de pelo menos 70% no conjunto de validação**, selecionando entre os candidatos aquele que apresentasse a maior Precision.
 
-Um possível fluxo de utilização seria:
+A partir desse critério, o threshold escolhido foi:
 
-```text
-Dados do cliente
-       ↓
-Modelo de Machine Learning
-       ↓
-Probabilidade de churn
-       ↓
-Perfil e valor do cliente
-       ↓
-Priorização
-       ↓
-Estratégia de retenção
-```
-
-Uma possibilidade é combinar o **risco estimado de churn** com informações relacionadas ao valor do cliente, como `MonthlyCharges`.
-
-Dessa forma, clientes com maior risco de cancelamento e maior relevância financeira podem receber prioridade na análise das equipes responsáveis pela retenção.
-
-A previsão não deve ser utilizada como único critério para determinar uma ação comercial.
-
-O objetivo é transformar o modelo em uma **ferramenta de apoio à decisão**.
+> **0,40**
 
 ---
 
-## 🧠 Interpretação dos resultados
+## 📊 Resultado final
 
-Ao final da modelagem, a análise buscará responder três questões principais:
+O modelo selecionado foi novamente avaliado no conjunto de teste utilizando o threshold de **0,40**.
 
-**1. Qual modelo apresentou melhor capacidade de identificar churn?**
+| Métrica       |  Resultado |
+| ------------- | ---------: |
+| **Accuracy**  |     77,64% |
+| **Precision** |     56,72% |
+| **Recall**    | **66,58%** |
+| **F1-score**  |     61,25% |
+| **ROC-AUC**   |     83,27% |
 
-O desempenho da Logistic Regression será comparado ao Random Forest para verificar se o modelo mais complexo oferece ganhos relevantes.
+O principal efeito do ajuste foi observado no **Recall**.
 
-**2. Quais erros são mais importantes para o negócio?**
+Com o threshold padrão de `0,50`, o modelo apresentava Recall de **52,67%**.
 
-A análise de falsos positivos e falsos negativos permitirá avaliar o impacto das previsões incorretas.
+Após o ajuste para `0,40`, o Recall passou para **66,58%**, um aumento de aproximadamente **13,9 pontos percentuais**.
 
-**3. Como transformar a probabilidade de churn em uma ação?**
+Em contrapartida, a Precision caiu de **61,95% para 56,72%**, enquanto a Accuracy passou de **78,85% para 77,64%**.
 
-A análise de threshold e a priorização dos clientes permitirão aproximar a previsão do modelo de uma possível estratégia de retenção.
-
-A conclusão final será baseada nos resultados efetivamente obtidos durante a modelagem.
+Esse resultado representa o trade-off esperado: o modelo passou a identificar uma parcela maior dos clientes que efetivamente cancelam, ao custo de gerar mais falsos positivos.
 
 ---
 
-## ⚠️ Cuidados considerados no projeto
+## 🔎 Matriz de confusão após ajuste
 
-Durante o desenvolvimento, alguns pontos são especialmente importantes:
+![Matriz de confusão com threshold ajustado](grafico5.png)
 
-* Evitar **data leakage** durante o pré-processamento
-* Manter os dados de teste fora do ajuste das transformações e dos modelos
-* Comparar desempenho entre treino e teste
-* Utilizar um modelo baseline antes de avaliar abordagens mais complexas
-* Não utilizar apenas acurácia como medida de desempenho
-* Dar atenção especial ao Recall no contexto de churn
-* Avaliar o impacto de diferentes thresholds
-* Interpretar associações sem assumir causalidade
-* Utilizar as previsões como apoio às decisões de negócio
+A matriz final permite observar o comportamento do modelo após a alteração do threshold.
+
+A decisão de aceitar uma redução de Precision em troca de maior Recall está relacionada ao contexto do problema: em uma estratégia de retenção, pode ser mais interessante analisar alguns clientes adicionais do que deixar uma parcela significativa dos clientes que realmente cancelariam passar sem identificação.
+
+---
+
+## 💼 Priorização de clientes
+
+Além da classificação de churn, o projeto utiliza a probabilidade prevista pelo modelo para criar uma estratégia simples de priorização.
+
+Foi construído o seguinte indicador:
+
+> **Score de Prioridade = Probabilidade de Churn × MonthlyCharges**
+
+A ideia é combinar duas informações:
+
+**risco de cancelamento + relevância financeira do cliente**
+
+Dessa forma, um cliente com alta probabilidade de churn e cobrança mensal elevada pode receber maior prioridade para análise.
+
+Nos clientes de maior prioridade encontrados no conjunto de teste, aparecem probabilidades de churn superiores a **80%**, associadas principalmente a contratos mensais e cobranças mensais elevadas.
+
+O score não representa uma decisão automática de oferecer desconto ou realizar alguma ação comercial.
+
+Ele funciona como uma **ferramenta de apoio**, permitindo que uma equipe de retenção tenha uma fila inicial de clientes que podem merecer investigação.
+
+---
+
+## 💡 Principais conclusões
+
+O projeto produziu alguns resultados importantes:
+
+* Um modelo mais complexo não necessariamente apresentou melhor desempenho.
+* A Logistic Regression superou o Random Forest nas principais métricas do conjunto de teste.
+* O Random Forest apresentou forte diferença entre treino e teste, indicando overfitting.
+* A acurácia isoladamente não foi suficiente para avaliar o problema.
+* O ajuste do threshold aumentou o Recall de **52,67% para 66,58%**.
+* Esse ganho ocorreu com redução de Precision, demonstrando um trade-off relevante para o negócio.
+* Probabilidades de churn podem ser combinadas com informações financeiras para apoiar a priorização de clientes.
+
+---
+
+## ⚠️ Limitações e cuidados
+
+Alguns pontos precisam ser considerados na interpretação dos resultados:
+
+* Associações encontradas nos dados não representam necessariamente causalidade.
+* O modelo estima risco com base nos padrões presentes na base utilizada.
+* Falsos positivos e falsos negativos possuem custos diferentes para o negócio.
+* A escolha do threshold depende dos objetivos e custos reais de uma estratégia de retenção.
+* O score de priorização utilizado é uma demonstração e precisaria ser validado com informações financeiras e comerciais reais antes de uma aplicação em produção.
+* As previsões devem ser utilizadas como apoio à decisão, e não como único critério para ações comerciais.
 
 ---
 
@@ -272,46 +281,45 @@ telecom_churn_prediction/
 │
 ├── README.md
 ├── analisechurn.ipynb
-├── gafico1.png
-└── grafico2.png
+├── grafico1.png
+├── grafico2.png
+├── grafico3.png
+├── grafico4.png
+└── grafico5.png
 ```
 
 ---
 
-## 🚧 Status do projeto
+## ✅ Status do projeto
 
-**Em desenvolvimento — etapa de modelagem.**
+**Projeto concluído.**
 
-Até o momento, foram realizadas:
+Foram realizadas as etapas de:
 
-* Inspeção e compreensão dos dados
-* Análise da distribuição do churn
-* Tratamento inicial
-* Análise exploratória
-* Análise da taxa de churn por tipo de contrato
-* Definição da estratégia de modelagem
-
-As etapas finais serão:
-
-1. Implementação do pipeline de pré-processamento
-2. Treinamento da Logistic Regression como baseline
-3. Treinamento do Random Forest
-4. Comparação entre treino e teste
-5. Avaliação da matriz de confusão
-6. Análise de diferentes thresholds
-7. Definição de uma estratégia de priorização de clientes
-8. Conclusão dos resultados
+1. Compreensão e tratamento dos dados
+2. Análise exploratória
+3. Separação entre treinamento, validação e teste
+4. Construção de pipeline de pré-processamento
+5. Treinamento de um modelo baseline
+6. Treinamento e comparação com Random Forest
+7. Avaliação utilizando diferentes métricas
+8. Análise de matriz de confusão
+9. Análise e ajuste do threshold
+10. Avaliação final em dados de teste
+11. Construção de uma estratégia de priorização de clientes
 
 ---
 
-## 🎯 Objetivo final
+## 🎯 Conclusão
 
-O objetivo final é construir uma solução capaz de identificar clientes com maior risco de churn e transformar essa previsão em informação útil para tomada de decisão.
+A comparação mostrou que a **Logistic Regression apresentou melhor capacidade de generalização que o Random Forest** neste conjunto de dados.
 
-Mais do que buscar o modelo com a maior métrica isolada, o projeto pretende avaliar o equilíbrio entre **desempenho preditivo, tipos de erro e impacto no negócio**.
+Embora o Random Forest tenha alcançado desempenho quase perfeito nos dados de treinamento, essa vantagem não se manteve no conjunto de teste.
 
-A análise final deverá permitir uma conclusão semelhante à seguinte estrutura:
+Como falsos negativos representam clientes em risco que deixam de ser identificados, o threshold da Logistic Regression foi ajustado de **0,50 para 0,40**.
 
-> **O modelo A apresentou determinado comportamento em relação ao baseline. O modelo B apresentou ganhos ou perdas em métricas relevantes para o problema. Considerando que falsos negativos possuem impacto importante em estratégias de retenção, foram analisados diferentes thresholds e, a partir dos resultados, construída uma estratégia de priorização de clientes.**
+Com essa alteração, o modelo alcançou **66,58% de Recall**, mantendo **77,64% de Accuracy** e **83,27% de ROC-AUC** no conjunto de teste.
 
-Os valores e conclusões definitivas serão adicionados somente após a execução e avaliação dos modelos.
+O resultado demonstra que a escolha de um modelo não depende apenas de sua acurácia ou complexidade. É necessário considerar **capacidade de generalização, tipos de erro e objetivos do negócio**.
+
+Por fim, as probabilidades produzidas pelo modelo foram utilizadas para criar uma estratégia simples de priorização, demonstrando como Machine Learning pode transformar dados de clientes em informações úteis para apoiar decisões relacionadas à retenção.
