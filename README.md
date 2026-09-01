@@ -1,203 +1,257 @@
 <img width="1600" height="400" alt="WhatsApp Image 2026-09-01 at 3 01 06 PM" src="https://github.com/user-attachments/assets/c03c2a7d-f73f-49cb-b9ac-cffdb0f2bbc0" />
-# Previsão de Churn em Telecom
 
-## Sobre o projeto
+# 📊 Previsão de Churn em Telecom
 
-Este projeto utiliza Machine Learning para analisar o comportamento de clientes de uma empresa de telecomunicações e identificar aqueles que apresentam maior probabilidade de cancelamento.
+Projeto de análise de dados e Machine Learning desenvolvido para identificar padrões associados ao cancelamento de clientes em uma empresa de telecomunicações.
 
-O objetivo não é apenas construir um modelo preditivo, mas entender os padrões encontrados nos dados e transformar essas informações em apoio para estratégias de retenção de clientes.
-
-O projeto foi desenvolvido em Python, utilizando análise exploratória de dados, pré-processamento, Random Forest e métricas de classificação.
+O objetivo é construir um modelo capaz de identificar clientes com maior probabilidade de churn e, a partir dessas informações, gerar insights que possam apoiar estratégias de retenção.
 
 ---
 
-## O problema de negócio
+## 🎯 Problema de negócio
 
-A perda de clientes, conhecida como **churn**, pode representar impacto direto na receita de empresas que trabalham com serviços recorrentes.
+A perda de clientes representa um impacto direto na receita e na sustentabilidade de uma empresa de telecomunicações.
 
-Nesse cenário, uma pergunta importante para o negócio é:
+Nesse contexto, o objetivo deste projeto é responder à seguinte pergunta:
 
-> **Quais clientes apresentam maior probabilidade de cancelar o serviço?**
+> **Quais características dos clientes estão mais associadas ao cancelamento e como um modelo preditivo pode ajudar a identificar clientes com maior risco de churn?**
 
-Uma previsão desse tipo pode ajudar equipes de retenção, Customer Success e Marketing a priorizar clientes para ações de relacionamento.
-
-O modelo não substitui a decisão da empresa. Ele funciona como uma ferramenta de apoio, permitindo direcionar esforços para os clientes que apresentam maior risco segundo os padrões identificados nos dados.
+A proposta não é apenas prever quais clientes podem cancelar, mas transformar os resultados do modelo em informações úteis para apoiar decisões de retenção.
 
 ---
 
-## Base de dados
+## 📂 Dataset
 
-O conjunto de dados utilizado contém informações de **7.043 clientes** e reúne características relacionadas ao perfil, serviços contratados, tipo de contrato, tempo de permanência e cobrança.
+Foi utilizado o dataset **Telco Customer Churn**, disponibilizado originalmente pela IBM e amplamente utilizado em projetos de análise e Machine Learning.
 
-Entre as principais variáveis analisadas estão:
+A base contém **7.043 clientes** e informações relacionadas a:
 
-| Variável          | Descrição                                            |
-| ----------------- | ---------------------------------------------------- |
-| `tenure`          | Tempo de permanência do cliente na empresa, em meses |
-| `Contract`        | Tipo de contrato do cliente                          |
-| `MonthlyCharges`  | Valor cobrado mensalmente                            |
-| `TotalCharges`    | Total acumulado de cobranças                         |
-| `PaymentMethod`   | Forma de pagamento utilizada                         |
-| `InternetService` | Tipo de serviço de internet contratado               |
-| `Churn`           | Indica se o cliente cancelou o serviço               |
+* Tempo de permanência na empresa (`tenure`)
+* Tipo de contrato (`Contract`)
+* Cobrança mensal (`MonthlyCharges`)
+* Valor total pago (`TotalCharges`)
+* Forma de pagamento (`PaymentMethod`)
+* Tipo de serviço de internet (`InternetService`)
+* Cancelamento do serviço (`Churn`)
+* Entre outras características dos clientes
 
-A variável `Churn` é o alvo que o modelo tenta prever.
+A variável `Churn` representa o cancelamento do serviço e foi utilizada como variável-alvo do modelo.
 
 ---
 
-## Distribuição do Churn
+## 📊 Distribuição do Churn
 
-Antes de construir o modelo, foi analisada a distribuição entre clientes que permaneceram e clientes que cancelaram o serviço.
+Antes da construção do modelo, foi analisada a distribuição entre clientes que permaneceram e clientes que cancelaram o serviço.
 
 ![Distribuição de Churn](grafico1.png)
 
 A quantidade de clientes que permaneceu na empresa é maior do que a quantidade de clientes que cancelou.
 
-Essa diferença entre as classes é importante porque mostra que **acurácia, sozinha, não é suficiente para avaliar o modelo**.
+Essa diferença entre as classes é importante para a avaliação do modelo, pois mostra que **acurácia, sozinha, não é suficiente** para analisar um problema de churn.
 
-Em um problema de churn, também é necessário observar métricas como precisão, recall, F1-score e ROC-AUC.
+Por esse motivo, também foram consideradas métricas como:
+
+* Precisão
+* Recall
+* F1-score
+* ROC-AUC
 
 ---
 
-## Análise exploratória
+## 🔎 Análise exploratória
 
-A análise exploratória foi utilizada para observar possíveis associações entre características dos clientes e o cancelamento.
-
-Os resultados apresentados nesta etapa representam padrões observados na base. Eles não devem ser interpretados como evidência de causalidade.
+A análise exploratória foi realizada para compreender melhor o comportamento dos clientes e identificar possíveis padrões relacionados ao cancelamento.
 
 ### Churn por tipo de contrato
 
-O tipo de contrato apresenta diferenças na taxa de cancelamento entre os grupos.
+O tipo de contrato apresenta diferenças na ocorrência de cancelamentos entre os grupos.
 
-![Taxa de Churn por contrato](grafico2.png)
+![Churn por tipo de contrato](grafico2.png)
 
-Essa análise ajuda a identificar quais tipos de contrato concentram uma proporção maior de clientes que cancelaram.
+Essa análise permite observar quais categorias de contrato apresentam maior concentração de clientes que cancelaram.
 
-Esse tipo de informação pode ser utilizado como ponto de partida para investigar estratégias específicas de retenção.
+Esse resultado pode ser utilizado como ponto de partida para investigar estratégias de retenção específicas para cada perfil de cliente.
+
+É importante destacar que uma associação observada nos dados **não significa necessariamente que uma variável seja a causa do cancelamento**.
 
 ---
 
-## Metodologia
+## 🧹 Tratamento dos dados
 
-O desenvolvimento do modelo foi dividido em algumas etapas.
+Antes da construção do modelo, foram realizadas algumas etapas de preparação:
 
-### 1. Preparação dos dados
+* Remoção da identificação individual dos clientes (`customerID`)
+* Conversão da variável `TotalCharges` para formato numérico
+* Tratamento de valores ausentes
+* Transformação da variável `Churn` em variável binária
+* Separação entre variáveis numéricas e categóricas
 
-Foi realizada a remoção do identificador do cliente e a conversão da variável `TotalCharges` para formato numérico.
+O pré-processamento das variáveis preditoras foi realizado dentro de um `Pipeline`, evitando que informações do conjunto de teste fossem utilizadas durante o treinamento.
 
-A variável `Churn` foi transformada em uma variável binária, sendo:
+---
 
-* `0` = cliente permaneceu
-* `1` = cliente cancelou
-
-### 2. Separação entre treino e teste
+## 🧪 Divisão entre treino e teste
 
 Os dados foram divididos em:
 
 * **80% para treinamento**
 * **20% para teste**
 
-A divisão foi realizada de forma estratificada, mantendo a proporção das classes de `Churn` nos dois conjuntos.
+Foi utilizada divisão estratificada para preservar aproximadamente a mesma proporção de clientes que cancelaram e permaneceram nos dois conjuntos.
 
-### 3. Pré-processamento
-
-As variáveis categóricas foram transformadas utilizando `OneHotEncoder`.
-
-Valores ausentes foram tratados dentro do pipeline utilizando imputação pela mediana para variáveis numéricas e pelo valor mais frequente para variáveis categóricas.
-
-Essa abordagem evita que informações do conjunto de teste sejam utilizadas durante o treinamento.
-
-### 4. Modelagem
-
-Foi utilizado o algoritmo **Random Forest Classifier**, um modelo baseado na combinação de diversas árvores de decisão.
+Essa separação permite avaliar o desempenho do modelo em dados que não foram utilizados durante seu treinamento.
 
 ---
 
-## Por que Random Forest?
+## ⚙️ Pré-processamento
 
-O Random Forest foi escolhido como modelo inicial por sua capacidade de trabalhar com relações não lineares e diferentes tipos de variáveis após o pré-processamento.
+As variáveis numéricas e categóricas receberam tratamentos diferentes.
 
-Outro ponto importante para este projeto é a possibilidade de analisar a importância das variáveis utilizadas pelo modelo.
+### Variáveis numéricas
 
-O objetivo, entretanto, não é assumir que as variáveis mais importantes sejam necessariamente as causas do churn. A importância representa o quanto determinada variável contribuiu para as decisões do modelo.
+Foi utilizado tratamento de valores ausentes por meio da mediana.
+
+### Variáveis categóricas
+
+Foi realizado:
+
+* Tratamento de valores ausentes pela categoria mais frequente
+* Codificação utilizando `OneHotEncoder`
+
+Todo esse processo foi incorporado ao pipeline do modelo.
+
+Essa abordagem reduz o risco de **data leakage**, garantindo que o conjunto de teste não influencie o processo de preparação dos dados utilizado durante o treinamento.
 
 ---
 
-## Avaliação do modelo
+## 🌳 Modelo utilizado
+
+Foi utilizado o algoritmo **Random Forest Classifier**.
+
+A escolha do Random Forest ocorreu por sua capacidade de trabalhar com diferentes tipos de variáveis e capturar relações não lineares presentes nos dados.
+
+Além disso, o modelo permite analisar a importância das variáveis utilizadas nas decisões preditivas.
+
+O modelo foi configurado utilizando:
+
+* `n_estimators = 100`
+* `max_depth = 10`
+* `random_state = 42`
+
+---
+
+## 📈 Avaliação do modelo
 
 O modelo foi avaliado tanto no conjunto de treinamento quanto no conjunto de teste.
 
-Essa comparação permite observar não apenas o desempenho durante o treinamento, mas também a capacidade de generalização para dados que o modelo não viu anteriormente.
+Foram utilizadas as seguintes métricas:
 
-As principais métricas utilizadas foram:
+### Accuracy
 
-| Métrica      | O que representa                                                                    |
-| ------------ | ----------------------------------------------------------------------------------- |
-| **Acurácia** | Proporção total de previsões corretas                                               |
-| **Precisão** | Entre os clientes classificados como churn, quantos realmente cancelaram            |
-| **Recall**   | Entre os clientes que realmente cancelaram, quantos foram identificados pelo modelo |
-| **F1-score** | Equilíbrio entre precisão e recall                                                  |
-| **ROC-AUC**  | Capacidade do modelo de distinguir as duas classes                                  |
+Indica a proporção total de previsões classificadas corretamente.
 
-### Resultados
+### Precision
 
-Os valores abaixo devem ser preenchidos com os resultados reais obtidos durante a execução do notebook.
+Indica, entre os clientes classificados como churn, quantos realmente cancelaram.
 
-| Métrica  |      Treino |       Teste |
-| -------- | ----------: | ----------: |
-| Acurácia | `resultado` | `resultado` |
-| Precisão | `resultado` | `resultado` |
-| Recall   | `resultado` | `resultado` |
-| F1-score | `resultado` | `resultado` |
-| ROC-AUC  | `resultado` | `resultado` |
+### Recall
 
-> **Importante:** os resultados apresentados aqui devem ser os mesmos obtidos na execução final do notebook.
+Indica, entre os clientes que realmente cancelaram, quantos foram identificados pelo modelo.
 
-Em um problema de churn, o **recall** merece atenção especial.
+### F1-score
 
-Um falso negativo representa um cliente que realmente cancelou, mas que não foi identificado pelo modelo como possível churn.
+Combina Precision e Recall em uma única métrica.
 
-Nesse contexto, aumentar o recall pode ser importante para reduzir a quantidade de clientes em risco que deixam de ser identificados.
+### ROC-AUC
+
+Avalia a capacidade do modelo de diferenciar clientes que cancelaram daqueles que permaneceram.
 
 ---
 
-## Da previsão para a ação
+## 🎯 Por que o Recall é importante?
 
-Uma possível aplicação do modelo seria utilizar as probabilidades previstas para criar grupos de prioridade.
+Em um problema de churn, deixar de identificar um cliente que realmente está em risco pode representar uma oportunidade perdida de retenção.
+
+Por isso, o **Recall merece atenção especial**.
+
+Um modelo com alta acurácia pode parecer bom mesmo quando apresenta dificuldades para identificar corretamente a classe de clientes que cancelaram.
+
+Dessa forma, a avaliação deve considerar o conjunto de métricas e não apenas uma única medida de desempenho.
+
+---
+
+## 🔢 Matriz de confusão
+
+A matriz de confusão permite visualizar a quantidade de:
+
+* Verdadeiros negativos
+* Falsos positivos
+* Falsos negativos
+* Verdadeiros positivos
+
+Essa análise ajuda a compreender de forma mais detalhada quais tipos de erro o modelo está cometendo.
+
+---
+
+## 💡 Interpretação das variáveis
+
+A análise das variáveis permite compreender quais características possuem maior participação nas decisões do modelo.
+
+Entre as informações analisadas estão características como:
+
+* Tipo de contrato
+* Tempo de permanência
+* Cobrança mensal
+* Forma de pagamento
+* Tipo de serviço contratado
+
+A importância das variáveis representa a contribuição delas **dentro do modelo**, não uma relação de causa e efeito.
+
+Portanto, uma variável considerada importante pelo modelo não deve ser interpretada automaticamente como a causa do churn.
+
+---
+
+## 💼 Aplicação no negócio
+
+Os resultados do modelo podem ser utilizados como apoio a uma estratégia de retenção.
+
+Um possível fluxo seria:
 
 ```text
-Dados dos clientes
-        ↓
-Pré-processamento
-        ↓
-Modelo de Machine Learning
-        ↓
-Probabilidade de Churn
-        ↓
-Segmentação de risco
-        ↓
-Ações de retenção
+Cliente
+   ↓
+Modelo preditivo
+   ↓
+Probabilidade de churn
+   ↓
+Identificação de clientes prioritários
+   ↓
+Análise do perfil
+   ↓
+Estratégia de retenção
 ```
 
-Por exemplo, clientes classificados com maior probabilidade de churn poderiam ser priorizados para ações de relacionamento, ofertas personalizadas ou contato da equipe responsável pela retenção.
+Por exemplo, clientes identificados pelo modelo como apresentando maior risco poderiam ser direcionados para análises ou ações de retenção.
 
-O modelo deve ser utilizado como **apoio à decisão**, e não como mecanismo automático para determinar qual ação será tomada com cada cliente.
-
----
-
-## Cuidados com o desenvolvimento
-
-Um dos pontos importantes deste projeto foi evitar **data leakage**, situação em que informações que deveriam estar disponíveis apenas após a separação dos dados acabam influenciando o treinamento.
-
-Para isso, o pré-processamento foi incorporado ao `Pipeline` do Scikit-learn.
-
-Essa estrutura permite que as transformações sejam ajustadas utilizando os dados de treinamento e posteriormente aplicadas ao conjunto de teste.
-
-Outro cuidado foi não utilizar `StandardScaler` desnecessariamente. Como o modelo escolhido é um Random Forest, a padronização das escalas das variáveis não é necessária para o funcionamento do algoritmo.
+O modelo deve funcionar como **ferramenta de apoio à decisão**, e não como único critério para definir uma ação comercial.
 
 ---
 
-## Tecnologias utilizadas
+## ⚠️ Cuidados durante o desenvolvimento
+
+Alguns cuidados foram considerados durante a construção do projeto:
+
+* Separação entre treino e teste antes do treinamento do modelo
+* Utilização de Pipeline para evitar data leakage
+* Tratamento das variáveis dentro do processo de modelagem
+* Avaliação utilizando múltiplas métricas
+* Atenção especial ao Recall
+* Interpretação das variáveis sem assumir causalidade
+* Utilização das previsões como apoio às decisões de negócio
+
+---
+
+## 🛠️ Tecnologias utilizadas
 
 * Python
 * Pandas
@@ -205,40 +259,63 @@ Outro cuidado foi não utilizar `StandardScaler` desnecessariamente. Como o mode
 * Matplotlib
 * Seaborn
 * Scikit-learn
-* Google Colab
+* Jupyter Notebook / Google Colab
 * GitHub
 
 ---
 
-## Estrutura do projeto
+## 📁 Estrutura do projeto
 
 ```text
 telecom_churn_prediction/
 │
 ├── README.md
-├── WA_Fn-UseC_-Telco-Customer-Churn.csv
 ├── notebook_churn.ipynb
+├── WA_Fn-UseC_-Telco-Customer-Churn.csv
 ├── grafico1.png
-├── grafico2.png
-└── requirements.txt
+└── grafico2.png
 ```
 
 ---
 
-## Conclusão
+## 🚀 Como executar o projeto
 
-Este projeto demonstrou como técnicas de Machine Learning podem ser utilizadas para identificar padrões associados ao cancelamento de clientes em uma empresa de telecomunicações.
+### 1. Clone o repositório
 
-A análise exploratória permitiu compreender características da base e observar diferenças entre clientes que permaneceram e clientes que cancelaram.
+```bash
+git clone https://github.com/thaiscarlis/telecom_churn_prediction.git
+```
 
-A utilização de um pipeline de pré-processamento junto ao Random Forest também contribuiu para uma estrutura mais adequada de treinamento e avaliação, reduzindo o risco de data leakage.
+### 2. Acesse a pasta
 
-Além da construção do modelo, o projeto busca demonstrar como uma previsão de churn pode ser transformada em informação útil para o negócio.
+```bash
+cd telecom_churn_prediction
+```
 
-Na prática, o modelo pode apoiar equipes de retenção na identificação e priorização de clientes com maior risco, permitindo que estratégias de relacionamento sejam direcionadas de forma mais eficiente.
+### 3. Instale as bibliotecas necessárias
 
-## Como próximos passos, o projeto poderia evoluir com testes de outros algoritmos, ajuste de hiperparâmetros, análise de diferentes thresholds de classificação e acompanhamento do desempenho do modelo em dados reais.
+```bash
+pip install pandas numpy matplotlib seaborn scikit-learn
+```
 
-## Notebook
+### 4. Execute o notebook
 
-O notebook completo com todas as etapas de análise, preparação dos dados, treinamento e avaliação do modelo está disponível neste repositório.
+Abra o arquivo:
+
+```text
+notebook_churn.ipynb
+```
+
+O projeto também pode ser executado diretamente pelo Google Colab.
+
+---
+
+## 📌 Conclusão
+
+Este projeto demonstra a aplicação de técnicas de análise exploratória e Machine Learning para um problema real de negócio: a previsão de churn em uma empresa de telecomunicações.
+
+A análise permite compreender o perfil dos clientes e identificar padrões associados ao cancelamento.
+
+O modelo preditivo pode ser utilizado para **priorizar clientes com maior probabilidade de churn**, permitindo que a empresa investigue esses perfis e desenvolva estratégias de retenção mais direcionadas.
+
+Como próximos passos, seria possível testar outros algoritmos, realizar ajuste de hiperparâmetros, avaliar diferentes estratégias de balanceamento das classes e buscar melhorias específicas no Recall do modelo.
