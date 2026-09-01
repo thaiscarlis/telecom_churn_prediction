@@ -1,235 +1,251 @@
+<img width="1600" height="400" alt="WhatsApp Image 2026-09-01 at 3 01 06 PM" src="https://github.com/user-attachments/assets/af10bc17-935f-4413-a699-1d143ffde350" />
 # Previsão de Churn em Telecom
 
-Projeto de Machine Learning desenvolvido para analisar o cancelamento de clientes de uma empresa de telecomunicações e identificar quais características estão mais relacionadas ao churn.
+![Capa do projeto](capa-churn-callcenter)
 
-A ideia foi trabalhar o problema não apenas como uma classificação de clientes, mas também como uma análise de negócio: entender **quem está mais propenso a cancelar e quais fatores estão relacionados a esse comportamento**.
+## Sobre o projeto
 
-## Objetivo
+Este projeto utiliza Machine Learning para analisar o comportamento de clientes de uma empresa de telecomunicações e identificar aqueles que apresentam maior probabilidade de cancelamento.
 
-O projeto foi dividido em duas partes principais:
+O objetivo não é apenas construir um modelo preditivo, mas entender os padrões encontrados nos dados e transformar essas informações em apoio para estratégias de retenção de clientes.
 
-* Criar um modelo capaz de prever o churn dos clientes.
-* Analisar os dados para identificar os principais fatores associados ao cancelamento.
-
-A base utilizada possui mais de 7 mil registros de clientes e informações como tipo de contrato, tempo de permanência, serviços contratados, cobrança mensal e forma de pagamento.
+O projeto foi desenvolvido em Python, utilizando análise exploratória de dados, pré-processamento, Random Forest e métricas de classificação.
 
 ---
 
-## 1. Preparação dos dados
+## O problema de negócio
 
-A primeira etapa foi verificar a estrutura da base e tratar os problemas encontrados.
+A perda de clientes, conhecida como **churn**, pode representar impacto direto na receita de empresas que trabalham com serviços recorrentes.
 
-Uma das inconsistências estava na coluna `TotalCharges`, que estava armazenada como texto e possuía alguns valores vazios.
+Nesse cenário, uma pergunta importante para o negócio é:
 
-Fiz a conversão da coluna para o formato numérico e tratei os valores ausentes antes de seguir para a modelagem.
+> **Quais clientes apresentam maior probabilidade de cancelar o serviço?**
 
-Também removi o `customerID`, já que o identificador do cliente não possui utilidade como variável preditora.
+Uma previsão desse tipo pode ajudar equipes de retenção, Customer Success e Marketing a priorizar clientes para ações de relacionamento.
 
-```python
-# ========================================== #
-# 1. IMPORTAÇÃO DAS BIBLIOTECAS             #
-# ========================================== #
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-```
-
-### Carregamento dos dados
-
-```python
-# ========================================== #
-# 2. CARREGAMENTO DOS DADOS                  #
-# ========================================== #
-
-df = pd.read_csv('WA_Fn-UseC_-Telco-Customer-Churn.csv')
-
-print("Formato dos dados originais:", df.shape)
-```
-
-### Tratamento de `TotalCharges`
-
-```python
-# ========================================== #
-# 3. LIMPEZA E TRATAMENTO DOS DADOS          #
-# ========================================== #
-
-df = df.drop(columns=['customerID'], errors='ignore')
-
-df['TotalCharges'] = pd.to_numeric(
-    df['TotalCharges'],
-    errors='coerce'
-)
-
-df['TotalCharges'] = df['TotalCharges'].fillna(
-    df['TotalCharges'].median()
-)
-```
-
-Depois disso, as variáveis categóricas foram transformadas em valores numéricos para que pudessem ser utilizadas pelo modelo.
-
-```python
-label_encoders = {}
-
-for col in df.select_dtypes(include=['object']).columns:
-    le = LabelEncoder()
-    df[col] = le.fit_transform(df[col].astype(str))
-    label_encoders[col] = le
-```
+O modelo não substitui a decisão da empresa. Ele funciona como uma ferramenta de apoio, permitindo direcionar esforços para os clientes que apresentam maior risco segundo os padrões identificados nos dados.
 
 ---
 
-## 2. Separação entre treino e teste
+## Base de dados
 
-A variável `Churn` foi definida como variável alvo.
+O conjunto de dados utilizado contém informações de **7.043 clientes** e reúne características relacionadas ao perfil, serviços contratados, tipo de contrato, tempo de permanência e cobrança.
 
-Separei 80% dos dados para treinamento e 20% para teste. Também utilizei `stratify` para manter uma proporção semelhante de clientes que cancelaram e não cancelaram nos dois conjuntos.
+Entre as principais variáveis analisadas estão:
 
-```python
-# ========================================== #
-# 4. SEPARAÇÃO DOS DADOS                    #
-# ========================================== #
+| Variável          | Descrição                                            |
+| ----------------- | ---------------------------------------------------- |
+| `tenure`          | Tempo de permanência do cliente na empresa, em meses |
+| `Contract`        | Tipo de contrato do cliente                          |
+| `MonthlyCharges`  | Valor cobrado mensalmente                            |
+| `TotalCharges`    | Total acumulado de cobranças                         |
+| `PaymentMethod`   | Forma de pagamento utilizada                         |
+| `InternetService` | Tipo de serviço de internet contratado               |
+| `Churn`           | Indica se o cliente cancelou o serviço               |
 
-X = df.drop(columns=['Churn'])
-y = df['Churn']
+A variável `Churn` é o alvo que o modelo tenta prever.
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    y,
-    test_size=0.2,
-    random_state=42,
-    stratify=y
-)
+---
+
+## Distribuição do Churn
+
+Antes de construir o modelo, foi analisada a distribuição entre clientes que permaneceram e clientes que cancelaram o serviço.
+
+![Distribuição de Churn](grafico1)
+
+A quantidade de clientes que permaneceu na empresa é maior do que a quantidade de clientes que cancelou.
+
+Essa diferença entre as classes é importante porque mostra que **acurácia, sozinha, não é suficiente para avaliar o modelo**.
+
+Em um problema de churn, também é necessário observar métricas como precisão, recall, F1-score e ROC-AUC.
+
+---
+
+## Análise exploratória
+
+A análise exploratória foi utilizada para observar possíveis associações entre características dos clientes e o cancelamento.
+
+Os resultados apresentados nesta etapa representam padrões observados na base. Eles não devem ser interpretados como evidência de causalidade.
+
+### Churn por tipo de contrato
+
+O tipo de contrato apresenta diferenças na taxa de cancelamento entre os grupos.
+
+![Taxa de Churn por contrato](grafico2)
+
+Essa análise ajuda a identificar quais tipos de contrato concentram uma proporção maior de clientes que cancelaram.
+
+Esse tipo de informação pode ser utilizado como ponto de partida para investigar estratégias específicas de retenção.
+
+---
+
+### Tempo de permanência
+
+A variável `tenure` representa o número de meses que o cliente permaneceu na empresa.
+
+![Tempo de permanência por Churn](imagens/tenure-churn.png)
+
+A comparação permite observar como o tempo de relacionamento se distribui entre clientes que permaneceram e aqueles que cancelaram.
+
+Essa variável também será utilizada pelo modelo na identificação de padrões associados ao churn.
+
+---
+
+### Cobrança mensal
+
+Também foi analisada a distribuição dos valores de cobrança mensal entre os dois grupos.
+
+![Cobrança mensal por Churn](imagens/monthly-charges-churn.png)
+
+A visualização permite comparar a distribuição de `MonthlyCharges` entre clientes que permaneceram e clientes que cancelaram.
+
+Assim como nas análises anteriores, essa relação representa uma associação encontrada nos dados e não significa que o valor da cobrança seja, isoladamente, responsável pelo cancelamento.
+
+---
+
+## Metodologia
+
+O desenvolvimento do modelo foi dividido em algumas etapas:
+
+**1. Preparação dos dados**
+
+Remoção do identificador do cliente e conversão da variável `TotalCharges` para formato numérico.
+
+**2. Separação entre treino e teste**
+
+Os dados foram divididos em:
+
+* 80% para treinamento
+* 20% para teste
+
+A divisão foi realizada de forma estratificada, mantendo a proporção das classes de Churn nos dois conjuntos.
+
+![Divisão entre treino e teste](imagens/divisao-treino-teste.png)
+
+**3. Pré-processamento**
+
+As variáveis categóricas foram transformadas utilizando `OneHotEncoder`.
+
+Valores ausentes foram tratados dentro do pipeline utilizando imputação pela mediana para variáveis numéricas e pelo valor mais frequente para variáveis categóricas.
+
+Essa abordagem evita que informações do conjunto de teste sejam utilizadas durante o treinamento.
+
+**4. Modelagem**
+
+Foi utilizado o algoritmo **Random Forest Classifier**, um modelo baseado na combinação de diversas árvores de decisão.
+
+---
+
+## Por que Random Forest?
+
+O Random Forest foi escolhido como modelo inicial por sua capacidade de trabalhar com relações não lineares e diferentes tipos de variáveis após o pré-processamento.
+
+Outro ponto importante para este projeto é a possibilidade de analisar a importância das variáveis utilizadas pelo modelo.
+
+O objetivo, entretanto, não é assumir que as variáveis mais importantes sejam necessariamente as causas do churn. A importância representa o quanto determinada variável contribuiu para as decisões do modelo.
+
+---
+
+## Avaliação do modelo
+
+O modelo foi avaliado tanto no conjunto de treinamento quanto no conjunto de teste.
+
+Essa comparação permite observar não apenas o desempenho durante o treinamento, mas também a capacidade de generalização para dados que o modelo não viu anteriormente.
+
+As principais métricas utilizadas foram:
+
+| Métrica      | O que representa                                                                    |
+| ------------ | ----------------------------------------------------------------------------------- |
+| **Acurácia** | Proporção total de previsões corretas                                               |
+| **Precisão** | Entre os clientes classificados como churn, quantos realmente cancelaram            |
+| **Recall**   | Entre os clientes que realmente cancelaram, quantos foram identificados pelo modelo |
+| **F1-score** | Equilíbrio entre precisão e recall                                                  |
+| **ROC-AUC**  | Capacidade do modelo de distinguir as duas classes                                  |
+
+### Resultados
+
+Os valores abaixo devem ser preenchidos com os resultados reais obtidos durante a execução do notebook.
+
+| Métrica  |      Treino |       Teste |
+| -------- | ----------: | ----------: |
+| Acurácia | `resultado` | `resultado` |
+| Precisão | `resultado` | `resultado` |
+| Recall   | `resultado` | `resultado` |
+| F1-score | `resultado` | `resultado` |
+| ROC-AUC  | `resultado` | `resultado` |
+
+> **Importante:** os resultados apresentados aqui devem ser os mesmos obtidos na execução final do notebook.
+
+Em um problema de churn, o **recall** merece atenção especial. Um falso negativo representa um cliente que realmente cancelou, mas que não foi identificado pelo modelo como possível churn.
+
+---
+
+## Matriz de confusão
+
+A matriz de confusão permite observar de forma mais detalhada os acertos e erros realizados pelo modelo no conjunto de teste.
+
+![Matriz de Confusão](imagens/matriz-confusao.png)
+
+Os principais resultados podem ser interpretados como:
+
+* **Verdadeiro negativo:** cliente que não cancelou e foi corretamente classificado.
+* **Verdadeiro positivo:** cliente que cancelou e foi corretamente identificado.
+* **Falso positivo:** cliente que não cancelou, mas foi classificado como churn.
+* **Falso negativo:** cliente que cancelou, mas não foi identificado pelo modelo.
+
+Para a área de retenção, os falsos negativos merecem atenção porque representam clientes que poderiam ter sido priorizados para uma ação, mas não foram identificados pelo modelo.
+
+---
+
+## Variáveis mais importantes
+
+O Random Forest permite analisar quais variáveis tiveram maior importância nas decisões realizadas pelo modelo.
+
+![Importância das variáveis](imagens/importancia-variaveis.png)
+
+Essa análise deve ser interpretada como uma forma de compreender o comportamento do modelo.
+
+Uma variável com alta importância não significa necessariamente que ela seja a causa do cancelamento. Ela indica que o modelo utilizou aquela informação com maior frequência ou relevância para realizar suas previsões.
+
+Além disso, variáveis categóricas são transformadas em diferentes categorias durante o One-Hot Encoding, o que deve ser considerado na interpretação do gráfico.
+
+---
+
+## Da previsão para a ação
+
+Uma possível aplicação do modelo seria utilizar as probabilidades previstas para criar grupos de prioridade.
+
+```text
+Dados dos clientes
+        ↓
+Pré-processamento
+        ↓
+Modelo de Machine Learning
+        ↓
+Probabilidade de Churn
+        ↓
+Segmentação de risco
+        ↓
+Ações de retenção
 ```
 
----
+![Fluxo de aplicação](imagens/fluxo-retencao.png)
 
-## 3. Modelo utilizado
+Por exemplo, clientes classificados com maior probabilidade de churn poderiam ser priorizados para ações de relacionamento, ofertas personalizadas ou contato da equipe responsável pela retenção.
 
-Para a classificação utilizei o **Random Forest Classifier**.
-
-Escolhi esse algoritmo por ser uma opção adequada para trabalhar com dados tabulares e por permitir analisar a importância das variáveis utilizadas nas decisões do modelo.
-
-```python
-# ========================================== #
-# 5. CRIAÇÃO E TREINAMENTO DO MODELO        #
-# ========================================== #
-
-modelo_churn = RandomForestClassifier(
-    random_state=42,
-    n_estimators=100,
-    max_depth=10
-)
-
-modelo_churn.fit(X_train, y_train)
-```
+O modelo deve ser utilizado como **apoio à decisão**, e não como mecanismo automático para determinar qual ação será tomada com cada cliente.
 
 ---
 
-## 4. Avaliação do modelo
+## Cuidados com o desenvolvimento
 
-Após o treinamento, utilizei os dados de teste para avaliar o desempenho do modelo.
+Um dos pontos importantes deste projeto foi evitar **data leakage**, situação em que informações que deveriam estar disponíveis apenas após a separação dos dados acabam influenciando o treinamento.
 
-```python
-# ========================================== #
-# 6. AVALIAÇÃO DO MODELO                    #
-# ========================================== #
+Para isso, o pré-processamento foi incorporado ao `Pipeline` do Scikit-learn.
 
-y_pred = modelo_churn.predict(X_test)
+Essa estrutura permite que as transformações sejam ajustadas utilizando os dados de treinamento e posteriormente aplicadas ao conjunto de teste.
 
-print("\n--- RESULTADOS DO MODELO ---")
-
-print(
-    f"Acurácia: {accuracy_score(y_test, y_pred) * 100:.2f}%"
-)
-
-print("\nRelatório de classificação:")
-
-print(
-    classification_report(y_test, y_pred)
-)
-```
-
-O modelo apresentou aproximadamente **79,63% de acurácia** no conjunto de teste.
-
-Além da acurácia, também analisei precision, recall e F1-score para ter uma visão mais completa do desempenho da classificação.
-
----
-
-## 5. Insights da análise
-
-Depois do treinamento, analisei a importância das variáveis para entender quais características tiveram maior influência nas previsões do modelo.
-
-Os principais pontos observados foram:
-
-1. **Tipo de contrato:** Clientes com contratos mensais apresentam uma ocorrência maior de churn em comparação com clientes com contratos de maior duração.
-
-2. **Tempo de permanência:** Clientes com pouco tempo de relacionamento com a empresa apresentam maior ocorrência de cancelamento, principalmente nos primeiros meses.
-
-3. **Faturamento e serviços contratados:** O valor da cobrança mensal aparece entre as variáveis relevantes. A relação com serviços adicionais, como suporte técnico e proteção de dispositivo, pode ser explorada para entender melhor o comportamento desses clientes.
-
-### Importância das variáveis
-
-![Gráfico de Importância das Variáveis](https://github.com/thaiscarlis/telecom_churn_prediction/raw/main/cancelamento%3Bchurn.png)
-
----
-
-## 6. Análise de importância das variáveis
-
-A importância das variáveis foi obtida diretamente a partir do modelo Random Forest.
-
-```python
-# ========================================== #
-# 7. IMPORTÂNCIA DAS VARIÁVEIS              #
-# ========================================== #
-
-importancias = pd.Series(
-    modelo_churn.feature_importances_,
-    index=X.columns
-).sort_values(ascending=False)
-
-plt.figure(figsize=(10, 6))
-
-sns.barplot(
-    x=importancias,
-    y=importancias.index
-)
-
-plt.title("Importância das variáveis para previsão de Churn")
-plt.xlabel("Importância")
-plt.ylabel("Variável")
-
-plt.tight_layout()
-plt.show()
-```
-
-Esse gráfico ajuda a visualizar quais variáveis foram mais utilizadas pelo modelo durante suas decisões.
-
-É importante destacar que **importância da variável não significa causalidade**. Ou seja, o fato de uma característica apresentar maior importância no modelo não significa necessariamente que ela seja a causa do cancelamento.
-
----
-
-## 7. Possível aplicação no negócio
-
-O modelo pode ser utilizado como parte de uma estratégia de retenção de clientes.
-
-Por exemplo, a empresa poderia gerar uma lista de clientes com maior probabilidade de churn e utilizar essa informação para priorizar ações do time de Customer Success ou Marketing.
-
-Algumas possibilidades seriam:
-
-* oferecer condições específicas para clientes em risco;
-* incentivar a migração para contratos de maior duração;
-* revisar serviços contratados;
-* identificar clientes que precisam de maior acompanhamento;
-* acompanhar a evolução do churn ao longo do tempo.
-
-A ideia não seria simplesmente prever quem vai cancelar, mas utilizar a previsão como uma informação adicional para apoiar decisões.
+Outro cuidado foi não utilizar `StandardScaler` desnecessariamente. Como o modelo escolhido é um Random Forest, a padronização das escalas das variáveis não é necessária para o funcionamento do algoritmo.
 
 ---
 
@@ -241,37 +257,62 @@ A ideia não seria simplesmente prever quem vai cancelar, mas utilizar a previs�
 * Matplotlib
 * Seaborn
 * Scikit-learn
-* Machine Learning
-* Random Forest
-* Análise de dados
+* Google Colab
+* GitHub
 
 ---
 
-## O que eu desenvolvi neste projeto
+## Estrutura do projeto
 
-Com esse projeto, pratiquei principalmente:
-
-* limpeza e preparação de dados;
-* tratamento de valores ausentes;
-* transformação de variáveis categóricas;
-* separação entre treino e teste;
-* treinamento de modelo de classificação;
-* avaliação de métricas;
-* análise de importância das variáveis;
-* interpretação dos resultados;
-* aplicação dos resultados em um contexto de negócio.
+```text
+telecom_churn_prediction/
+│
+├── README.md
+├── WA_Fn-UseC_-Telco-Customer-Churn.csv
+├── notebook_churn.ipynb
+│
+├── imagens/
+│   ├── capa-telecom-churn.png
+│   ├── distribuicao-churn.png
+│   ├── divisao-treino-teste.png
+│   ├── churn-por-contrato.png
+│   ├── tenure-churn.png
+│   ├── monthly-charges-churn.png
+│   ├── matriz-confusao.png
+│   ├── importancia-variaveis.png
+│   └── fluxo-retencao.png
+│
+└── requirements.txt
+```
 
 ---
 
-## Próximos passos
+## Conclusão
 
-Algumas melhorias que podem ser exploradas em uma próxima versão:
+Este projeto demonstra uma aplicação prática de Machine Learning para um problema de negócio relacionado à retenção de clientes.
 
-* comparar o Random Forest com outros algoritmos de classificação;
-* analisar o balanceamento da variável `Churn`;
-* testar diferentes hiperparâmetros;
-* utilizar métricas como ROC-AUC;
-* analisar a matriz de confusão com mais detalhes;
-* realizar uma análise exploratória mais aprofundada;
-* criar um dashboard para acompanhar os principais indicadores de churn;
-* gerar uma saída com a probabilidade de churn de cada cliente.
+A partir da análise exploratória, foi possível observar diferentes padrões associados ao churn. Em seguida, foi desenvolvido um modelo de Random Forest com pré-processamento estruturado em pipeline, evitando vazamento de informações entre treinamento e teste.
+
+A avaliação foi realizada utilizando diferentes métricas, permitindo uma visão mais completa do desempenho do modelo do que a utilização isolada da acurácia.
+
+Mais do que prever quem pode cancelar, o objetivo é transformar a previsão em informação útil para apoiar a priorização de estratégias de retenção.
+
+### Próximos passos
+
+Como evolução do projeto, algumas possibilidades seriam:
+
+* Comparar o Random Forest com Regressão Logística e outros algoritmos.
+* Realizar otimização de hiperparâmetros.
+* Avaliar a calibração das probabilidades previstas.
+* Criar faixas de risco de churn.
+* Desenvolver um dashboard no Power BI.
+* Criar uma rotina para disponibilizar novas previsões.
+* Avaliar o impacto das ações de retenção após a implementação do modelo.
+
+---
+
+## Notebook
+
+O desenvolvimento completo, incluindo preparação dos dados, análise exploratória, treinamento e avaliação do modelo, está disponível no notebook:
+
+**`notebook_churn.ipynb`**
