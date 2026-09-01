@@ -64,7 +64,7 @@ Na base utilizada:
 * **5.174 clientes permaneceram**
 * **1.869 clientes cancelaram o serviço**
 
-![Distribuição de clientes por situação de Churn](grafico1.png)
+![Distribuição de clientes por situação de Churn](gafico1.png)
 
 A distribuição mostra que a quantidade de clientes que permaneceu na empresa é consideravelmente maior do que a quantidade de clientes que cancelou.
 
